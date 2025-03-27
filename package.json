@@ -1,0 +1,21 @@
+{
+  "name": "@zenobia-pay/client",
+  "version": "0.0.1",
+  "description": "Zenobia Pay client for payments",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"No tests yet\""
+  },
+  "keywords": [
+    "zenobia",
+    "payments",
+    "sdk"
+  ],
+  "author": "Zenobia Pay",
+  "license": "MIT",
+  "dependencies": {
+    "qrcode": "^1.5.4"
+  }
+}
