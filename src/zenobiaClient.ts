@@ -1,41 +1,53 @@
-import { createTransfer, TransferResponse, StatementItem } from "./api";
-import { generateQrCode } from "./qr";
-import { pollTransferStatus } from "./poll";
+import { generateQR } from "./qr.js";
 
 export class ZenobiaClient {
-  private merchantBackend: string;
-  private merchantId: string;
+  private apiKey: string;
+  private baseUrl: string;
 
-  constructor(merchantId: string, merchantBackend: string) {
-    this.merchantId = merchantId;
-    this.merchantBackend = merchantBackend;
+  constructor(
+    apiKey: string = "test_key",
+    baseUrl: string = "https://api.zenobia.pay"
+  ) {
+    this.apiKey = apiKey;
+    this.baseUrl = baseUrl;
   }
 
-  async payWithZenobia(
+  async createPayment(
     amount: number,
-    statementItems?: StatementItem[]
-  ): Promise<void> {
+    currency: string,
+    description: string
+  ): Promise<number> {
     try {
-      const transfer: TransferResponse = await createTransfer(
-        this.merchantBackend,
-        amount,
-        statementItems
-      );
+      const response = await fetch(`${this.baseUrl}/payments`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({
+          amount,
+          currency,
+          description,
+        }),
+      });
 
-      const qrData = {
-        transferRequestId: transfer.transferRequestId,
-        merchantId: transfer.merchantId,
-        amount: transfer.amount,
-      };
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create payment");
+      }
 
-      const qrCodeUrl = await generateQrCode(qrData);
-
-      console.log("QR Code URL:", qrCodeUrl);
-
-      // start polling
-      pollTransferStatus(transfer.transferRequestId);
+      const payment = await response.json();
+      return payment.id;
     } catch (error) {
-      console.error("Payment initiation failed:", error);
+      console.error("Error creating payment:", error);
+      throw error instanceof Error
+        ? error
+        : new Error("Failed to create payment");
     }
+  }
+  async generateQRCode(paymentId: number): Promise<string> {
+    // Generate a QR code for the payment
+    const paymentUrl = `${this.baseUrl}/pay/${paymentId}`;
+    return generateQR(paymentUrl);
   }
 }

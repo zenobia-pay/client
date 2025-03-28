@@ -1,5 +1,5 @@
 {
-  "name": "@zenobia-pay/client",
+  "name": "@zenobia/client",
   "version": "0.0.2",
   "description": "Zenobia Pay client for payments",
   "main": "src/index.js",
@@ -13,6 +13,9 @@
     "payments",
     "sdk"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "Zenobia Pay",
   "license": "MIT",
   "dependencies": {
