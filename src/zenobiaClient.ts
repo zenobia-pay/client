@@ -1,53 +1,47 @@
 import { generateQR } from "./qr.js";
 
+export interface StatementItem {
+  name: string;
+  amount: number;
+}
+
 export class ZenobiaClient {
-  private apiKey: string;
-  private baseUrl: string;
+  constructor() {}
 
-  constructor(
-    apiKey: string = "test_key",
-    baseUrl: string = "https://api.zenobia.pay"
-  ) {
-    this.apiKey = apiKey;
-    this.baseUrl = baseUrl;
-  }
-
-  async createPayment(
+  async createTransferRequest(
+    url: string,
     amount: number,
-    currency: string,
-    description: string
+    statementItems: StatementItem[]
   ): Promise<number> {
     try {
-      const response = await fetch(`${this.baseUrl}/payments`, {
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
           amount,
-          currency,
-          description,
+          statementItems,
         }),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to create payment");
+        throw new Error(error.message || "Failed to create transfer request");
       }
 
-      const payment = await response.json();
-      return payment.id;
+      const transfer = await response.json();
+      return transfer.id;
     } catch (error) {
-      console.error("Error creating payment:", error);
+      console.error("Error creating transfer request:", error);
       throw error instanceof Error
         ? error
-        : new Error("Failed to create payment");
+        : new Error("Failed to create transfer request");
     }
   }
-  async generateQRCode(paymentId: number): Promise<string> {
+
+  async generateQRCode(paymentUrl: string): Promise<string> {
     // Generate a QR code for the payment
-    const paymentUrl = `${this.baseUrl}/pay/${paymentId}`;
     return generateQR(paymentUrl);
   }
 }

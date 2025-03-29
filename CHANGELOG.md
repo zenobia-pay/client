@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.5
+
+- Properly use the createTransfer endpoint on merchant backend.
+
 ## 0.0.4
 
 - Bundle with vite.
