@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.7
+
+- Remove console.log
+
 ## 0.0.6
 
 - Fixing the return value of the createTransferRequest.
