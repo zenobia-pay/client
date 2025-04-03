@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.6
+
+- Fixing the return value of the createTransferRequest.
+
 ## 0.0.5
 
 - Properly use the createTransfer endpoint on merchant backend.

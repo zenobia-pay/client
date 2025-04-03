@@ -30,8 +30,9 @@ export class ZenobiaClient {
         throw new Error(error.message || "Failed to create transfer request");
       }
 
+      console.log("response", response.json());
       const transfer = await response.json();
-      return transfer.id;
+      return transfer;
     } catch (error) {
       console.error("Error creating transfer request:", error);
       throw error instanceof Error
