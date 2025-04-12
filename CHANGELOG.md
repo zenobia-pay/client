@@ -1,8 +1,12 @@
 # Changelog
 
+## 0.0.8
+
+- Removed polling, switched to websocket.
+
 ## 0.0.7
 
-- Remove console.log
+- Remove all the dumb woodcut images.
 
 ## 0.0.6
 
