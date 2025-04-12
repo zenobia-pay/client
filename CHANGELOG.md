@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.0.9
+
+- Fix the websocket connection.
+
 ## 0.0.8
 
 - Removed polling, switched to websocket.

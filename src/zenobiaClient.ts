@@ -25,7 +25,8 @@ export class ZenobiaClient {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private transferId: string | null = null;
-  private wsUrl = "https://transfer-status.zenobiapay.com";
+  private signature: string | null = null;
+  private wsBaseUrl = "transfer-status.zenobiapay.com";
   private onStatusCallback: WebSocketStatusCallback | null = null;
   private onErrorCallback: WebSocketErrorCallback | null = null;
   private onConnectionCallback: WebSocketConnectionCallback | null = null;
@@ -76,6 +77,7 @@ export class ZenobiaClient {
       // Parse the transfer response
       const transfer: TransferResponse = await response.json();
       this.transferId = transfer.transferRequestId;
+      this.signature = transfer.signature;
 
       // Establish WebSocket connection
       this.connectWebSocket();
@@ -100,21 +102,25 @@ export class ZenobiaClient {
       this.notifyConnectionStatus(false);
     }
 
-    // Only create a new WebSocket if we have a transferId
-    if (!this.transferId) {
-      console.error("Cannot connect to WebSocket: No transfer ID available");
+    // Only create a new WebSocket if we have a transferId and signature
+    if (!this.transferId || !this.signature) {
+      console.error(
+        "Cannot connect to WebSocket: Missing transfer ID or signature"
+      );
       return;
     }
 
-    console.log(`Attempting to connect to WebSocket: ${this.wsUrl}`);
-
     try {
-      // Create WebSocket connection with transfer ID as a query parameter
-      const wsUrlObj = new URL(this.wsUrl);
-      wsUrlObj.searchParams.append("transferId", this.transferId);
+      // Determine protocol (wss for https, ws for http)
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+
+      // Construct the WebSocket URL in the correct format
+      const wsUrl = `${protocol}//${this.wsBaseUrl}/transfers/${this.transferId}/ws?token=${this.signature}`;
+
+      console.log(`Attempting to connect to WebSocket: ${wsUrl}`);
 
       // Create new WebSocket connection
-      const socket = new WebSocket(wsUrlObj.toString());
+      const socket = new WebSocket(wsUrl);
       this.socket = socket;
 
       socket.onopen = () => {
@@ -233,6 +239,7 @@ export class ZenobiaClient {
     }
 
     this.transferId = null;
+    this.signature = null;
   }
 
   /**
