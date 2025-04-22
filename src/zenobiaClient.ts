@@ -117,28 +117,19 @@ export class ZenobiaClient {
       // Construct the WebSocket URL in the correct format
       const wsUrl = `${protocol}//${this.wsBaseUrl}/transfers/${this.transferId}/ws?token=${this.signature}`;
 
-      console.log(`Attempting to connect to WebSocket: ${wsUrl}`);
-
       // Create new WebSocket connection
       const socket = new WebSocket(wsUrl);
       this.socket = socket;
 
       socket.onopen = () => {
         this.notifyConnectionStatus(true);
-        this.reconnectAttempts = 0; // Reset reconnect attempts on successful connection
-        console.log(`WebSocket connected for transfer: ${this.transferId}`);
+        this.reconnectAttempts = 0;
       };
 
       socket.onclose = (event) => {
         this.notifyConnectionStatus(false);
         this.socket = null;
-        console.log(
-          `WebSocket disconnected for transfer: ${this.transferId}`,
-          event.code,
-          event.reason
-        );
 
-        // Try to reconnect if not manually closed
         if (
           event.code !== 1000 &&
           this.reconnectAttempts < this.maxReconnectAttempts
@@ -166,30 +157,19 @@ export class ZenobiaClient {
 
           // Check the message type and handle accordingly
           if (data.type === "status" && data.transfer) {
-            // Status message with transfer data
-            console.log(
-              `Status update received via WebSocket: ${data.transfer.status}`,
-              data.transfer
-            );
             this.notifyStatus(data.transfer);
           } else if (data.type === "error" && data.message) {
-            // Error message
-            console.error(`Error message from server: ${data.message}`);
             this.notifyError(data.message);
           } else if (data.type === "ping") {
-            // Respond to ping with pong to keep connection alive
-            console.log("Ping received, sending pong");
             if (socket.readyState === WebSocket.OPEN) {
               socket.send(JSON.stringify({ type: "pong" }));
             }
           }
         } catch (err) {
-          console.error("Failed to parse message:", err, evt.data);
           this.notifyError("Failed to parse message");
         }
       };
     } catch (error) {
-      console.error(`Error setting up WebSocket connection:`, error);
       this.notifyError("Failed to establish WebSocket connection");
     }
   }
@@ -200,10 +180,9 @@ export class ZenobiaClient {
   private attemptReconnect(): void {
     this.reconnectAttempts++;
 
-    // Calculate reconnect delay with exponential backoff, capped at 5 seconds
     const reconnectDelay = Math.min(
       1000 * Math.pow(2, this.reconnectAttempts - 1),
-      5000
+      30000
     );
 
     console.log(
