@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.10
+
+### Patch Changes
+
+- 0dc86c6: CLeaned up logs and comments
+
 ## 0.0.9
 
 - Fix the websocket connection.
