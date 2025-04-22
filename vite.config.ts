@@ -1,7 +1,5 @@
 import { defineConfig } from "vite";
-import solidPlugin from "vite-plugin-solid";
 export default defineConfig({
-  plugins: [solidPlugin()],
   build: {
     lib: {
       entry: "./src/index.ts",
@@ -10,7 +8,7 @@ export default defineConfig({
       formats: ["es", "cjs"],
     },
     rollupOptions: {
-      external: ["solid-js"],
+      external: [],
     },
   },
 });
