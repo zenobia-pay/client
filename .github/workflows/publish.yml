@@ -1,0 +1,48 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
+
+      - name: Configure npm auth
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build + Publish
+        run: npm run release
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install -y gh
+
+      - name: Create GitHub Release (if not exists)
+        run: |
+          VERSION="v$(node -p "require('./package.json').version")"
+          if gh release view "$VERSION" &>/dev/null; then
+            echo "Release $VERSION already exists"
+          else
+            gh release create "$VERSION" \
+              --title "$VERSION" \
+              --notes-file CHANGELOG.md
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
