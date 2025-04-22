@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "test": "echo \"No tests yet\""
+    "test": "echo \"No tests yet\"",
+    "release": "npm run build && npm publish --access public"
   },
   "keywords": [
     "zenobia",
@@ -24,6 +25,7 @@
     "vite-plugin-solid": "^2.11.6"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.29.2",
     "@types/qrcode": "^1.5.5"
   }
 }
