@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.12
+
+### Patch Changes
+
+- e9a2a19: Remove unnecessary dependencies
+
 ## 0.0.11
 
 ### Patch Changes
