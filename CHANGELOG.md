@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.13
+
+### Patch Changes
+
+- Switch from passing statementItems and amount to arbitrary metadata
+
 ## 0.0.12
 
 ### Patch Changes

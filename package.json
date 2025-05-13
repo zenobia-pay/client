@@ -1,13 +1,13 @@
 {
   "name": "@zenobia/client",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Zenobia Pay client for payments",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
     "build": "vite build",
     "test": "echo \"No tests yet\"",
-    "release": "npm run build && npm publish --access public"
+    "release": "changeset version && git add . && git commit -m \"chore: release\" && git push && git push --tags && npm run build && changeset publish"
   },
   "keywords": [
     "zenobia",

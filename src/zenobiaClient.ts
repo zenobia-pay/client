@@ -1,8 +1,3 @@
-export interface StatementItem {
-  name: string;
-  amount: number;
-}
-
 export interface TransferResponse {
   transferRequestId: string;
   merchantId: string;
@@ -36,8 +31,7 @@ export class ZenobiaClient {
   /**
    * Creates a transfer request and establishes a WebSocket connection to listen for status updates
    * @param url API endpoint for creating the transfer
-   * @param amount Transfer amount
-   * @param statementItems Statement items for the transfer
+   * @param metadata Arbitrary JSON object containing transfer metadata
    * @param onStatus Callback for status updates
    * @param onError Callback for error messages
    * @param onConnection Callback for connection status
@@ -45,28 +39,22 @@ export class ZenobiaClient {
    */
   async createTransferAndListen(
     url: string,
-    amount: number,
-    statementItems: StatementItem[],
+    metadata: Record<string, any>,
     onStatus?: WebSocketStatusCallback,
     onError?: WebSocketErrorCallback,
     onConnection?: WebSocketConnectionCallback
   ): Promise<TransferResponse> {
-    // Set callbacks if provided
     if (onStatus) this.onStatusCallback = onStatus;
     if (onError) this.onErrorCallback = onError;
     if (onConnection) this.onConnectionCallback = onConnection;
 
     try {
-      // Create the transfer request
       const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          amount,
-          statementItems,
-        }),
+        body: JSON.stringify(metadata),
       });
 
       if (!response.ok) {
@@ -111,13 +99,9 @@ export class ZenobiaClient {
     }
 
     try {
-      // Determine protocol (wss for https, ws for http)
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-
-      // Construct the WebSocket URL in the correct format
       const wsUrl = `${protocol}//${this.wsBaseUrl}/transfers/${this.transferId}/ws?token=${this.signature}`;
 
-      // Create new WebSocket connection
       const socket = new WebSocket(wsUrl);
       this.socket = socket;
 
@@ -155,7 +139,6 @@ export class ZenobiaClient {
         try {
           const data = JSON.parse(evt.data);
 
-          // Check the message type and handle accordingly
           if (data.type === "status" && data.transfer) {
             this.notifyStatus(data.transfer);
           } else if (data.type === "error" && data.message) {
