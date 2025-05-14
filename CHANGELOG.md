@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.14
+
+### Patch Changes
+
+- Add helper functions
+
 ## 0.0.13
 
 ### Patch Changes

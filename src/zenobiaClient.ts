@@ -28,6 +28,14 @@ export class ZenobiaClient {
 
   constructor() {}
 
+  getSignature(): string | null {
+    return this.signature;
+  }
+
+  getTransferId(): string | null {
+    return this.transferId;
+  }
+
   /**
    * Creates a transfer request and establishes a WebSocket connection to listen for status updates
    * @param url API endpoint for creating the transfer
