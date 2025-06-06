@@ -37,25 +37,15 @@ export class ZenobiaClient {
   }
 
   /**
-   * Creates a transfer request and establishes a WebSocket connection to listen for status updates
+   * Creates a transfer request
    * @param url API endpoint for creating the transfer
    * @param metadata Arbitrary JSON object containing transfer metadata
-   * @param onStatus Callback for status updates
-   * @param onError Callback for error messages
-   * @param onConnection Callback for connection status
    * @returns The transfer response object
    */
-  async createTransferAndListen(
+  async createTransfer(
     url: string,
-    metadata: Record<string, any>,
-    onStatus?: WebSocketStatusCallback,
-    onError?: WebSocketErrorCallback,
-    onConnection?: WebSocketConnectionCallback
+    metadata: Record<string, any>
   ): Promise<TransferResponse> {
-    if (onStatus) this.onStatusCallback = onStatus;
-    if (onError) this.onErrorCallback = onError;
-    if (onConnection) this.onConnectionCallback = onConnection;
-
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -75,9 +65,6 @@ export class ZenobiaClient {
       this.transferId = transfer.transferRequestId;
       this.signature = transfer.signature;
 
-      // Establish WebSocket connection
-      this.connectWebSocket();
-
       return transfer;
     } catch (error) {
       console.error("Error creating transfer request:", error);
@@ -85,6 +72,57 @@ export class ZenobiaClient {
         ? error
         : new Error("Failed to create transfer request");
     }
+  }
+
+  /**
+   * Establishes a WebSocket connection to listen for transfer status updates
+   * @param transferId The ID of the transfer to listen to
+   * @param signature The signature for authenticating the WebSocket connection
+   * @param onStatus Callback for status updates
+   * @param onError Callback for error messages
+   * @param onConnection Callback for connection status
+   */
+  listenToTransfer(
+    transferId: string,
+    signature: string,
+    onStatus?: WebSocketStatusCallback,
+    onError?: WebSocketErrorCallback,
+    onConnection?: WebSocketConnectionCallback
+  ): void {
+    this.transferId = transferId;
+    this.signature = signature;
+    if (onStatus) this.onStatusCallback = onStatus;
+    if (onError) this.onErrorCallback = onError;
+    if (onConnection) this.onConnectionCallback = onConnection;
+
+    this.connectWebSocket();
+  }
+
+  /**
+   * Creates a transfer request and establishes a WebSocket connection to listen for status updates
+   * @param url API endpoint for creating the transfer
+   * @param metadata Arbitrary JSON object containing transfer metadata
+   * @param onStatus Callback for status updates
+   * @param onError Callback for error messages
+   * @param onConnection Callback for connection status
+   * @returns The transfer response object
+   */
+  async createTransferAndListen(
+    url: string,
+    metadata: Record<string, any>,
+    onStatus?: WebSocketStatusCallback,
+    onError?: WebSocketErrorCallback,
+    onConnection?: WebSocketConnectionCallback
+  ): Promise<TransferResponse> {
+    const transfer = await this.createTransfer(url, metadata);
+    this.listenToTransfer(
+      transfer.transferRequestId,
+      transfer.signature,
+      onStatus,
+      onError,
+      onConnection
+    );
+    return transfer;
   }
 
   /**
