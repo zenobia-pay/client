@@ -18,15 +18,19 @@ export class ZenobiaClient {
   private socket: WebSocket | null = null;
   private reconnectTimeout: number | null = null;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+  private maxReconnectAttempts = 6;
   private transferId: string | null = null;
   private signature: string | null = null;
-  private wsBaseUrl = "transfer-status.zenobiapay.com";
+  private wsBaseUrl: string;
   private onStatusCallback: WebSocketStatusCallback | null = null;
   private onErrorCallback: WebSocketErrorCallback | null = null;
   private onConnectionCallback: WebSocketConnectionCallback | null = null;
 
-  constructor() {}
+  constructor(isTest: boolean = false) {
+    this.wsBaseUrl = isTest
+      ? "transfer-status-test.zenobiapay.com"
+      : "transfer-status.zenobiapay.com";
+  }
 
   getSignature(): string | null {
     return this.signature;

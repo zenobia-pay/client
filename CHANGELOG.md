@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.16
+
+### Patch Changes
+
+- Add test mode
+
 ## 0.0.15
 
 ### Patch Changes

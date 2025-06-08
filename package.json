@@ -1,6 +1,6 @@
 {
   "name": "@zenobia/client",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Zenobia Pay client for payments",
   "main": "src/index.js",
   "type": "module",
