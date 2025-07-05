@@ -13,6 +13,12 @@ export interface TransferStatus {
 export type WebSocketStatusCallback = (status: TransferStatus) => void;
 export type WebSocketErrorCallback = (error: string) => void;
 export type WebSocketConnectionCallback = (connected: boolean) => void;
+export type WebSocketScanCallback = (scanData: {
+  type: string;
+  scanType: string;
+  transferId: string;
+  timestamp: number;
+}) => void;
 
 export class ZenobiaClient {
   private socket: WebSocket | null = null;
@@ -25,6 +31,7 @@ export class ZenobiaClient {
   private onStatusCallback: WebSocketStatusCallback | null = null;
   private onErrorCallback: WebSocketErrorCallback | null = null;
   private onConnectionCallback: WebSocketConnectionCallback | null = null;
+  private onScanCallback: WebSocketScanCallback | null = null;
 
   constructor(isTest: boolean = false) {
     this.wsBaseUrl = isTest
@@ -85,19 +92,22 @@ export class ZenobiaClient {
    * @param onStatus Callback for status updates
    * @param onError Callback for error messages
    * @param onConnection Callback for connection status
+   * @param onScan Callback for scan messages
    */
   listenToTransfer(
     transferId: string,
     signature: string,
     onStatus?: WebSocketStatusCallback,
     onError?: WebSocketErrorCallback,
-    onConnection?: WebSocketConnectionCallback
+    onConnection?: WebSocketConnectionCallback,
+    onScan?: WebSocketScanCallback
   ): void {
     this.transferId = transferId;
     this.signature = signature;
     if (onStatus) this.onStatusCallback = onStatus;
     if (onError) this.onErrorCallback = onError;
     if (onConnection) this.onConnectionCallback = onConnection;
+    if (onScan) this.onScanCallback = onScan;
 
     this.connectWebSocket();
   }
@@ -109,6 +119,7 @@ export class ZenobiaClient {
    * @param onStatus Callback for status updates
    * @param onError Callback for error messages
    * @param onConnection Callback for connection status
+   * @param onScan Callback for scan messages
    * @returns The transfer response object
    */
   async createTransferAndListen(
@@ -116,7 +127,8 @@ export class ZenobiaClient {
     metadata: Record<string, any>,
     onStatus?: WebSocketStatusCallback,
     onError?: WebSocketErrorCallback,
-    onConnection?: WebSocketConnectionCallback
+    onConnection?: WebSocketConnectionCallback,
+    onScan?: WebSocketScanCallback
   ): Promise<TransferResponse> {
     const transfer = await this.createTransfer(url, metadata);
     this.listenToTransfer(
@@ -124,7 +136,8 @@ export class ZenobiaClient {
       transfer.signature,
       onStatus,
       onError,
-      onConnection
+      onConnection,
+      onScan
     );
     return transfer;
   }
@@ -193,6 +206,9 @@ export class ZenobiaClient {
             this.notifyStatus(data.transfer);
           } else if (data.type === "error" && data.message) {
             this.notifyError(data.message);
+          } else if (data.type === "scan") {
+            // Handle scan messages (scanned/unscanned)
+            this.notifyScan(data);
           } else if (data.type === "ping") {
             if (socket.readyState === WebSocket.OPEN) {
               socket.send(JSON.stringify({ type: "pong" }));
@@ -278,6 +294,17 @@ export class ZenobiaClient {
   private notifyError(error: string): void {
     if (this.onErrorCallback) {
       this.onErrorCallback(error);
+    }
+  }
+
+  private notifyScan(scanData: {
+    type: string;
+    scanType: string;
+    transferId: string;
+    timestamp: number;
+  }): void {
+    if (this.onScanCallback) {
+      this.onScanCallback(scanData);
     }
   }
 }

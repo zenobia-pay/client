@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.17
+
+### Patch Changes
+
+- Add scanning logic to the client
+
 ## 0.0.16
 
 ### Patch Changes
